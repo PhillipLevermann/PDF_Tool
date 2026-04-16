@@ -1,0 +1,18 @@
+PDF Tool
+
+This tool allows you to merge and split PDF files quickly and locally.
+
+Features:
+- Merge multiple PDF files
+- Split PDF into separate documents
+- Drag & drop file reordering
+
+How to use:
+1. Select your PDF files
+2. Arrange them if needed
+3. Click "Merge" or "Split"
+4. Choose a save location
+
+Tech:
+- Python (Tkinter)
+- PyPDF
