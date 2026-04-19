@@ -1,13 +1,14 @@
 import tkinter as tk
-from tkinter import ttk
-from model import SPLIT_MARKER
+from tkinter import ttk, filedialog
+
+SPLIT_MARKER = "───── SPLIT ─────"
 
 class PDF_Tool_View:
     def __init__(self, root):
         self.root = root
         self.root.title("PDF Tool")
-        self.root.geometry("500x300")
-        self.root.minsize(300, 280) 
+        self.root.geometry("500x320")
+        self.root.minsize(300, 320) 
 
         self.notebook = ttk.Notebook(root)
         self.notebook.pack(fill=tk.BOTH, expand=True)
@@ -32,22 +33,38 @@ class PDF_Tool_View:
         self.btn_merge = tk.Button(frame_top, text='Merge')
         self.btn_merge.pack(side=tk.RIGHT, padx=1, pady=3)
 
-        #LISTBOX MID
+        #TREEVIEW MID
 
         frame_mid = tk.Frame(tab_merge)
         frame_mid.pack(fill=tk.BOTH, expand=True)
 
-        self.listbox_merge = tk.Listbox(frame_mid, font=("Consolas", 10))
-        self.listbox_merge.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        self.treeview_merge = ttk.Treeview(frame_mid,
+                                    columns=('page', 'filename', 'path'), 
+                                    show='headings')
+        self.treeview_merge.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
-        scrollbar_listbox = tk.Scrollbar(frame_mid, orient=tk.VERTICAL)
-        scrollbar_listbox.pack(side=tk.RIGHT, fill=tk.Y)
+        self.treeview_merge.heading('page', text='Pages')
+        self.treeview_merge.heading('filename', text='Filename')
+        self.treeview_merge.heading('path', text='Path')
 
-        scrollbar_listbox.config(command=self.listbox_merge.yview)
-        self.listbox_merge.config(yscrollcommand=scrollbar_listbox.set)
+        self.treeview_merge.column('page', width=50, minwidth=50, stretch=False)
+        self.treeview_merge.column('filename', width=200, minwidth=100, stretch=False)
+        self.treeview_merge.column('path', width=250, minwidth=100, stretch=True)
 
-        self.listbox_merge.bind("<Button-1>", self._drag_start)
-        self.listbox_merge.bind("<B1-Motion>", self._drag_move)
+        self.treeview_merge.tag_configure('split_marker', 
+                                          font=('Arial', 10, 'bold'), 
+                                          background="#AAAAAA")
+
+        scrollbar_treeview = tk.Scrollbar(frame_mid, orient=tk.VERTICAL)
+        scrollbar_treeview.pack(side=tk.RIGHT, fill=tk.Y)
+
+        scrollbar_treeview.config(command=self.treeview_merge.yview)
+        self.treeview_merge.config(yscrollcommand=scrollbar_treeview.set)
+
+        self.treeview_merge.bind('<Button-1>', self._drag_start)
+        self.treeview_merge.bind('<B1-Motion>', self._drag_move)
+        self.treeview_merge.bind('<ButtonRelease-1>', self.stop_drag)
+        self.treeview_merge.bind('<Delete>', self._remove_bind)
 
         #STATUS BOT
 
@@ -81,23 +98,40 @@ class PDF_Tool_View:
         self.btn_split = tk.Button(frame_top, text='Split')
         self.btn_split.pack(side=tk.RIGHT, padx=1, pady=3)
 
-        #LISTBOX MID
+        #TREEVIEW MID
 
         frame_mid = tk.Frame(tab_split)
         frame_mid.pack(fill=tk.BOTH, expand=True)
 
-        self.listbox_split = tk.Listbox(frame_mid,  font=("Consolas", 10))
-        self.listbox_split.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        self.treeview_split = ttk.Treeview(frame_mid,
+                                           columns=('page', 'filename', 'path'), 
+                                           show='headings')
+        self.treeview_split.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
-        scrollbar_listbox = tk.Scrollbar(frame_mid, orient=tk.VERTICAL)
-        scrollbar_listbox.pack(side=tk.RIGHT, fill=tk.Y)
+        self.treeview_split.heading('page', text='Page #')
+        self.treeview_split.heading('filename', text='Filename')
+        self.treeview_split.heading('path', text='Path')
 
-        scrollbar_listbox.config(command=self.listbox_split.yview)
-        self.listbox_split.config(yscrollcommand=scrollbar_listbox.set)
+        self.treeview_split.column('page', width=50, minwidth=50, stretch=False)
+        self.treeview_split.column('filename', width=200, minwidth=100, stretch=False)
+        self.treeview_split.column('path', width=250, minwidth=100, stretch=True)
 
-        self.listbox_split.bind("<Button-1>", self._drag_start)
-        self.listbox_split.bind("<B1-Motion>", self._drag_move)
+        self.treeview_split.tag_configure('split_marker', 
+                                          font=('Arial', 10, 'bold'),
+                                          foreground="#FFFFFF", 
+                                          background="#5C5C5C")
 
+        scrollbar_treeview = tk.Scrollbar(frame_mid, orient=tk.VERTICAL)
+        scrollbar_treeview.pack(side=tk.RIGHT, fill=tk.Y)
+
+        scrollbar_treeview.config(command=self.treeview_split.yview)
+        self.treeview_split.config(yscrollcommand=scrollbar_treeview.set)
+
+        self.treeview_split.bind('<Button-1>', self._drag_start)
+        self.treeview_split.bind('<B1-Motion>', self._drag_move)
+        self.treeview_split.bind('<ButtonRelease-1>', self.stop_drag)
+        self.treeview_split.bind('<Delete>', self._remove_bind)
+        
         #STATUS BOT
 
         frame_bot = tk.Frame(tab_split)
@@ -120,40 +154,81 @@ class PDF_Tool_View:
         info.config(state=tk.DISABLED)
 
     def _drag_start (self, event):
-        widget = event.widget
-        widget.drag_index = widget.nearest(event.y)
+        item = event.widget.identify_row(event.y)
+        if item:
+            self.drag_item = item
 
     def _drag_move (self, event):
         widget = event.widget
 
-        i = widget.nearest(event.y)
-        if i != widget.drag_index:
-            entry = widget.get(widget.drag_index)
-            widget.delete(widget.drag_index)
-            widget.insert(i, entry)
-            widget.drag_index = i
+        if not self.drag_item:
+            return
+
+        target_item = widget.identify_row(event.y)
+
+        if target_item and target_item != self.drag_item:
+            target_index = widget.index(target_item)
+            widget.move(self.drag_item, "", target_index)
+
+    def stop_drag(self, event):
+        self.drag_item = None
 
     #######################
     #UTIL METHODS
     #######################
 
-    def _get_files(self, listbox):
-        return listbox.get(0, tk.END)
+    # INTERNAL
+
+    def _get_files(self, tree):
+        list_dict = []
+
+        for id in tree.get_children():
+            item = tree.item(id)
+            values = item['values']
+            tags = item['tags']
+
+            if 'split_marker' in tags:
+                list_dict.append({'type': 'split'})
+            else:
+                list_dict.append({
+                    'type': 'page',
+                    'page': values[0],
+                    'name': values[1],
+                    'path': values[2]
+                })  
+
+        return list_dict
     
-    def _add_files(self, listbox, file):
-        listbox.insert(tk.END, file)
+    def _get_item_tags(self, tree, item):
+        try:
+            return tree.item(item, "tags")
+        except Exception:
+            return ()
 
-    def _clear_listbox(self, listbox):
-        listbox.delete(0, tk.END)
+    def _get_item_ids(self, tree):
+        return tree.get_children()
+    
+    def _add_files(self, tree, list):
+        for file in list:
+            tree.insert('', tk.END, values=(file[0], file[1], file[2]))
 
-    def _add_split(self, listbox, pos):
-        listbox.insert(pos, SPLIT_MARKER)
+    def _clear_tree(self, tree):
+        for item in tree.get_children():
+            tree.delete(item)
 
-    def _remove_entry(self, listbox, pos):
-        listbox.delete(pos)
+    def _add_split(self, tree, pos):
+        tree.insert('', pos, values=('', SPLIT_MARKER, ''), tags=('split_marker'))
 
-    def _get_index(self, listbox):
-        return (listbox.curselection())
+    def _remove_sel(self, tree):
+        for item in tree.selection():
+            tree.delete(item)
+    
+    def _remove_bind(self, event):
+        self._remove_sel(event.widget)
+
+    def _get_sel_index(self, tree):
+        selection = tree.selection()
+        return tree.index(selection[0]) if selection else None
 
     def _set_status(self, label, text):
         label.configure(text=text)
@@ -162,36 +237,66 @@ class PDF_Tool_View:
         with open('info.txt', 'r', encoding='utf-8') as file:
             return file.read()
         
+    #GENERIC
+
+    def ask_open_pdf_files(self):
+        selected_pdf = filedialog.askopenfilenames(
+            title='Choose PDF files',
+            filetypes=[('PDF files', '.pdf')]
+        )
+        return selected_pdf
+
+    def ask_save_pdf_path(self):
+        savepath = filedialog.asksaveasfilename(
+                title='Save as..',
+                filetypes=[('PDF files', '*.pdf')],
+                defaultextension=('.pdf')
+            )
+        return savepath
+
     #MERGE
+
     def get_files_merge(self):
-        return self._get_files(self.listbox_merge)
+        return self._get_files(self.treeview_merge)
     
-    def add_files_merge(self, file):
-        self._add_files(self.listbox_merge, file)
+    def add_files_merge(self, list):
+        self._add_files(self.treeview_merge, list)
     
-    def clear_listbox_merge(self):
-        self._clear_listbox(self.listbox_merge)
+    def clear_tree_merge(self):
+        self._clear_tree(self.treeview_merge)
 
     def set_status_merge(self, text):
         self._set_status(self.status_merge, text)
-    #SPLIT
-    def get_files_split(self):
-        return self._get_files(self.listbox_split)
-    
-    def add_files_split(self, file):
-        self._add_files(self.listbox_split, file)
 
-    def clear_listbox_split(self):
-        self._clear_listbox(self.listbox_split)
+    #SPLIT
+
+    def get_item_tags_split(self, item):
+        return self._get_item_tags(self.treeview_split, item)
+
+    def get_item_ids_split(self):
+        return self._get_item_ids(self.treeview_split)
+
+    def get_files_split(self):
+        return self._get_files(self.treeview_split)
+    
+    def add_files_split(self, list):
+        self._add_files(self.treeview_split, list)
+
+    def clear_tree_split(self):
+        self._clear_tree(self.treeview_split)
 
     def add_split(self, pos):
-        return self._add_split(self.listbox_split, pos)
+        self._add_split(self.treeview_split, pos)
     
-    def remove_split(self, pos):
-        self._remove_entry(self.listbox_split, pos)
+    def remove_sel_split(self):
+        self._remove_sel(self.treeview_split)
 
-    def get_index_split(self):
-        return self._get_index(self.listbox_split)
+    def remove_items_split(self, items):
+        if items:
+            self.treeview_split.delete(*items)
 
+    def get_sel_index_split(self):
+        return self._get_sel_index(self.treeview_split)
+        
     def set_status_split(self, text):
         self._set_status(self.status_split, text)
