@@ -5,8 +5,6 @@ if TYPE_CHECKING:
     from view import PDF_Tool_View
     from model import PDF_Tool_Model
 
-from tkinter import filedialog, messagebox
-
 class PDF_Tool_Controller:
     def __init__(self, view: PDF_Tool_View, model: PDF_Tool_Model):
         self.view = view
@@ -15,14 +13,29 @@ class PDF_Tool_Controller:
         self._bind_events()
 
     def _bind_events(self):
-        self.view.btn_select_merge.config(command=self.select_merge)
-        self.view.btn_clear_merge.config(command=self.view.clear_tree_merge)
+        #TABS
+        self.view.btn_tab_merge.config(command=lambda: self.view.switch_tab("merge"))
+        self.view.btn_tab_split.config(command=lambda: self.view.switch_tab("split"))
+        self.view.btn_tab_info.config(command=lambda: self.view.switch_tab("info"))
+
+        #MERGE
+        self.view.btn_merge_move_up.config(command=self.view.move_selected_up_merge)
+        self.view.btn_merge_remove.config(command=self.view.remove_sel_merge)
+        self.view.btn_merge_move_dn.config(command=self.view.move_selected_down_merge)
+
+        self.view.btn_merge_select.config(command=self.select_merge)
+        self.view.btn_merge_clear.config(command=self.view.clear_tree_merge)
         self.view.btn_merge.config(command=self.merge_files)
 
-        self.view.btn_select_split.config(command=self.select_split)
-        self.view.btn_clear_split.config(command=self.view.clear_tree_split)
+        #SPLIT
+        self.view.btn_split_move_up.config(command=self.view.move_selected_up_split)
+        self.view.btn_split_remove.config(command=self.view.remove_selection_split)
+        self.view.btn_split_move_dn.config(command=self.view.move_selected_down_split)
+
+        self.view.btn_split_select.config(command=self.select_split)
+        self.view.btn_split_clear.config(command=self.view.clear_tree_split)  
         self.view.btn_add_split.config(command=self.add_split)
-        self.view.btn_remove_split.config(command=self.view.remove_sel_split)
+
         self.view.btn_split.config(command=self.split_files)
 
     # MERGE 
@@ -110,9 +123,9 @@ class PDF_Tool_Controller:
         pos = self.view.get_sel_index_split()
         if pos is not None:
             insert = pos + 1
-            self.view.add_split(insert)
+            self.view.add_split_marker_split(insert)
         else:
-            self.view.add_split(0)
+            self.view.add_split_marker_split(0)
         self._remove_unnecessary_splits()
 
     def split_files(self):
@@ -124,7 +137,4 @@ class PDF_Tool_Controller:
             savepath = self.view.ask_save_pdf_path()
 
             self.model.split_pdfs(pdf_files, savepath)
-
-        else:
-            self.view.set_status_split('NO FILES SELECTED')
 

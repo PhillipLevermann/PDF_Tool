@@ -10,8 +10,9 @@ Features:
 How to use:
 1. Select your PDF files
 2. Arrange them if needed
-3. Click "Merge" or "Split"
-4. Choose a save location
+3. (Split Tab) Add split(s)
+4. Click "Merge" or "Split"
+5. Choose a save location
 
 Tech:
 - Python (Tkinter)
