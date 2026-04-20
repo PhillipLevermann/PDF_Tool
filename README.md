@@ -10,7 +10,9 @@ A lightweight desktop application for merging and splitting PDF files locally.
 
 ## Download
 Download the latest version from the **Releases** section.
-> Note: Windows may show a security warning when running the .exe. This is normal for unsigned applications.
+> Note: Windows Defender may flag the executable as a false positive.  
+> This can happen with unsigned applications built with PyInstaller.  
+> The source code is fully available in this repository.
 
 ## Usage
 1. Add PDF files to the list  
