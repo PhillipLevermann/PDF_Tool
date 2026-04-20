@@ -1,29 +1,35 @@
 # PDF Tool
 
-A simple desktop application to merge and split PDF files locally.
+A lightweight desktop application for merging and splitting PDF files locally.
 
 ## Features
-- Merge multiple PDF files into one
+- Merge multiple PDF files into a single document
 - Split PDFs using custom split markers
 - Drag & drop file reordering
-- Local processing (no file upload required)
+- 100% local processing (no uploads required)
+
+## Download
+Download the latest version from the **Releases** section.
 
 ## Usage
-1. Add PDF files to the list
-2. Rearrange files using drag & drop
-3. Insert split markers where needed
-4. Click Merge or Split
-5. Choose a save location
+1. Add PDF files to the list  
+2. Rearrange files using drag & drop  
+3. Insert split markers where needed  
+4. Click **Merge** or **Split**  
+5. Choose a save location  
 
 ## Tech Stack
-- Python
-- Tkinter (GUI)
-- pypdf (PDF processing)
+- Python  
+- Tkinter (GUI)  
+- pypdf  
 
 ## Notes
-- Works locally, no internet connection required
-- Designed as a lightweight and fast desktop tool
+- Works completely offline  
+- Lightweight and fast  
+- No external services required  
 
----
-
-This project is part of my portfolio and demonstrates basic GUI development, file handling, and working with PDFs in Python.
+## About
+This project is part of my portfolio and demonstrates:
+- GUI development with Tkinter  
+- File handling in Python  
+- Application structure using the MVC pattern  
