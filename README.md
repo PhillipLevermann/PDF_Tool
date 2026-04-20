@@ -10,6 +10,7 @@ A lightweight desktop application for merging and splitting PDF files locally.
 
 ## Download
 Download the latest version from the **Releases** section.
+> Note: Windows may show a security warning when running the .exe. This is normal for unsigned applications.
 
 ## Usage
 1. Add PDF files to the list  
